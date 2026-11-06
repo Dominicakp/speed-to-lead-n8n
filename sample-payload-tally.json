@@ -1,0 +1,16 @@
+{
+  "body": {
+    "eventType": "FORM_RESPONSE",
+    "data": {
+      "formName": "Request a demo",
+      "fields": [
+        { "label": "What is your First name?", "type": "INPUT_TEXT", "value": "Ada" },
+        { "label": "What is your Last name?", "type": "INPUT_TEXT", "value": "Okafor" },
+        { "label": "What is your email?", "type": "INPUT_EMAIL", "value": "ada@example.com" },
+        { "label": "Phone number", "type": "INPUT_PHONE_NUMBER", "value": "+2348012345678" },
+        { "label": "Your Company Name", "type": "INPUT_TEXT", "value": "Okafor Logistics" },
+        { "label": "Your Message", "type": "TEXTAREA", "value": "Interested in a demo" }
+      ]
+    }
+  }
+}

@@ -1,0 +1,504 @@
+{
+  "name": "GTM_Salesforce",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "new_lead",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e068c8c3-a7bc-4da0-872f-14b1c8dd5022",
+      "name": "Webhook",
+      "webhookId": "158daaf8-882f-4fdc-9bb8-dd3d8f8ae5ca"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e40f745b-7ce7-43e1-965b-1f797dc01aea",
+              "name": "body.first_name",
+              "value": "={{ ($json.body.data.fields.find(f => f.label === 'What is your First name?')?.value || '').trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "e56fcfbf-52d7-431c-8728-94fe20db19ad",
+              "name": "body.last_name",
+              "value": "={{ ($json.body.data.fields.find(f => f.label === 'What is your Last name?')?.value || '').trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "31307398-33df-44fe-af8c-2ba131c7570e",
+              "name": "body.email",
+              "value": "={{ ($json.body.data.fields.find(f => f.label === 'What is your email?')?.value || '').trim().toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "02fb0491-bc24-4130-a065-fead59e2f7f5",
+              "name": "body.company",
+              "value": "={{ ($json.body.data.fields.find(f => f.label === 'Your Company Name')?.value || '').trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "f6f76641-ed60-4e52-9d39-6c2e98a7c728",
+              "name": "body.phone",
+              "value": "={{ ($json.body.data.fields.find(f => f.label === 'Phone number')?.value || '').trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "60b9ed6f-90c1-47c5-b182-1a7488b8ac7d",
+              "name": "body.message",
+              "value": "={{ ($json.body.data.fields.find(f => f.label === 'Your Message')?.value || '').trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "8fc2c94e-9b0b-4b55-9304-adeba2622ef2",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c9df9f36-e9c6-452f-9d9c-18ab461fb192",
+              "leftValue": "={{ $json.body.email }}",
+              "rightValue": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            },
+            {
+              "id": "c6eefd5a-2f1d-4d44-8f01-4d95448e3f5f",
+              "leftValue": "={{ $json.body.last_name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "d7f1eb71-210a-4e59-b376-1110a3625e1a",
+              "leftValue": "={{ $json.body.company }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "3ce6f443-c129-4906-bb52-008d3d7dd2fd",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "company": "={{ $json.body.company }}",
+        "lastname": "={{ $json.body.last_name }}",
+        "additionalFields": {
+          "description": "={{ $json.body.message }}",
+          "email": "={{ $json.body.email }}",
+          "firstname": "={{ $json.body.first_name }}",
+          "leadSource": "=Web",
+          "phone": "={{ $json.body.phone }}"
+        }
+      },
+      "type": "n8n-nodes-base.salesforce",
+      "typeVersion": 1,
+      "position": [
+        624,
+        -48
+      ],
+      "id": "1f72cda7-689e-40a1-b925-7087f75c5247",
+      "name": "Create a lead",
+      "credentials": {
+        "salesforceOAuth2Api": {
+          "id": "FXtbcK85QPmCpfPp",
+          "name": "Salesforce account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0CE85R15AQ",
+          "mode": "id"
+        },
+        "text": "=🔥 New lead: {{ $('Edit Fields').item.json.body.first_name }} {{ $('Edit Fields').item.json.body.last_name }}  \nCompany: {{ $('Edit Fields').item.json.body.company }}\nEmail: {{ $('Edit Fields').item.json.body.email }}\nPhone:{{ $('Edit Fields').item.json.body.phone }}\nMessage: {{ $('Edit Fields').item.json.body.message }}\n\nOpen in Salesforce: https://orgfarm-f22e4d5646-dev-ed.develop.lightning.force.com//lightning/r/Lead/{{ $json.id }}/view",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        832,
+        -48
+      ],
+      "id": "eaa6f704-66ee-40a0-b5da-fc16229e31f8",
+      "name": "Send a message",
+      "webhookId": "0a594b93-d67c-4320-9290-c9220d6364ee",
+      "credentials": {
+        "slackApi": {
+          "id": "nNiG3vYbpUu3mpXT",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "143bdA6DacCrC99QOYBYNBGNod6XtbFZ_gui7DAlEVKw",
+          "mode": "list",
+          "cachedResultName": "new_lead fall back log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/143bdA6DacCrC99QOYBYNBGNod6XtbFZ_gui7DAlEVKw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/143bdA6DacCrC99QOYBYNBGNod6XtbFZ_gui7DAlEVKw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $now }}",
+            " first_name ": "={{ $json.body.first_name }}",
+            " email ": "={{ $json.body.email }}",
+            " last_name ": "={{ $json.body.last_name }}",
+            "company ": "={{ $json.body.company }}",
+            " phone": "={{ $json.body.phone }}",
+            " message": "={{ $json.body.message }}",
+            "  error": "={{ $json.error }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": " first_name ",
+              "displayName": " first_name ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": " last_name ",
+              "displayName": " last_name ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": " email ",
+              "displayName": " email ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "company ",
+              "displayName": "company ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": " phone",
+              "displayName": " phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": " message",
+              "displayName": " message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "  error",
+              "displayName": "  error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        896,
+        112
+      ],
+      "id": "b2f7d7d5-5d40-4efd-8a73-31318ed96dc7",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GvzBOqGBDxe5ggFM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "143bdA6DacCrC99QOYBYNBGNod6XtbFZ_gui7DAlEVKw",
+          "mode": "list",
+          "cachedResultName": "new_lead fall back log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/143bdA6DacCrC99QOYBYNBGNod6XtbFZ_gui7DAlEVKw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 393994039,
+          "mode": "list",
+          "cachedResultName": "Rejected",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/143bdA6DacCrC99QOYBYNBGNod6XtbFZ_gui7DAlEVKw/edit#gid=393994039"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            " first_name ": "={{ $('Edit Fields').item.json.body.first_name }}",
+            " last_name ": "={{ $('Edit Fields').item.json.body.last_name }}",
+            " email ": "={{ $('Edit Fields').item.json.body.email }}",
+            "company ": "={{ $('Edit Fields').item.json.body.company }}",
+            " phone": "={{ $('Edit Fields').item.json.body.phone }}",
+            " message": "={{ $('Edit Fields').item.json.body.message }}",
+            "timestamp": "={{ $now }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": " first_name ",
+              "displayName": " first_name ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": " last_name ",
+              "displayName": " last_name ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": " email ",
+              "displayName": " email ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "company ",
+              "displayName": "company ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": " phone",
+              "displayName": " phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": " message",
+              "displayName": " message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "  error",
+              "displayName": "  error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        624,
+        96
+      ],
+      "id": "51c9b288-784d-4acc-aad4-7bdae8b66187",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GvzBOqGBDxe5ggFM",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Create a lead",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a lead": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "8272e5d2-d825-415d-a137-797a95a0718b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ba80657e1a63046e83db346136968376fa5d7032b0725bd604fe9f68bfb5986a"
+  },
+  "id": "b6ovUu9TpGH4U1CMr-why",
+  "tags": []
+}
